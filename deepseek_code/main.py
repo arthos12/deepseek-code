@@ -7,6 +7,13 @@ import sys
 import os
 from pathlib import Path
 
+# Force UTF-8 on Windows
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 from deepseek_code.config import load_config
 from deepseek_code.agent import Agent
 from deepseek_code.session import (

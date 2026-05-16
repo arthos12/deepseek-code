@@ -37,9 +37,15 @@ class Display:
         pass  # thinking is internal; don't stream to user
 
     def stream_token(self, text: str):
-        with self._lock:
-            sys.stdout.write(text)
-            sys.stdout.flush()
+        try:
+            with self._lock:
+                sys.stdout.write(text)
+                sys.stdout.flush()
+        except UnicodeEncodeError:
+            with self._lock:
+                safe = text.encode("gbk", errors="replace").decode("gbk")
+                sys.stdout.write(safe)
+                sys.stdout.flush()
 
     def stream_end(self, had_tools: bool = False):
         """End streaming. If tools were used, add a subtle separator before the response."""
