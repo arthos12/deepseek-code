@@ -81,7 +81,7 @@ def load_config(config_dir: str = ".") -> dict:
     if not config.get("project_dir"):
         config["project_dir"] = os.environ.get("DEEPSEEK_PROJECT_DIR", os.getcwd())
 
-    # Sessions per project directory
-    config["sessions_dir"] = str(Path(config["project_dir"]) / config["sessions_dir"])
+    # Sessions in .deepseek/ per project (hidden, keeps source tree clean)
+    config["sessions_dir"] = str(Path(config["project_dir"]) / ".deepseek" / "sessions")
 
     return config
