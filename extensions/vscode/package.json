@@ -1,0 +1,62 @@
+{
+  "name": "deepseek-code",
+  "displayName": "DeepSeek Code",
+  "description": "DeepSeek Code — AI coding agent for VS Code",
+  "version": "0.1.0",
+  "publisher": "arthos12",
+  "license": "MIT",
+  "repository": "https://github.com/arthos12/deepseek-code",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Chat",
+    "Programming Languages"
+  ],
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "deepseek-code.openChat",
+        "title": "DeepSeek Code: Open Chat"
+      },
+      {
+        "command": "deepseek-code.explainCode",
+        "title": "DeepSeek Code: Explain Selected Code"
+      },
+      {
+        "command": "deepseek-code.fixCode",
+        "title": "DeepSeek Code: Fix Selected Code"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "deepseek-code.openChat",
+        "key": "ctrl+shift+d"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "deepseek-code.explainCode",
+          "group": "deepseek-code"
+        },
+        {
+          "command": "deepseek-code.fixCode",
+          "group": "deepseek-code"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "tsc -p ./",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^25.8.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  }
+}
