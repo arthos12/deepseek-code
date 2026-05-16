@@ -16,7 +16,7 @@ def build_system_prompt(skills_dir: str = "./skills", project_dir: str = ".") ->
 
 {memory_content}
 
-Working environment: {platform.system()} with {default_shell}, Python {python_version}. Project: {os.getcwd()}. Skills: {skill_descriptions if skill_descriptions else "none"}.
+Working environment: {platform.system()} with {default_shell}, Python {python_version}. Project: {project_dir}. Skills: {skill_descriptions if skill_descriptions else "none"}.
 
 Match the user's language — if they write in Chinese, reply in Chinese. If English, reply in English.
 

@@ -156,26 +156,21 @@ class Agent:
         if len(text) < 300:
             return text
 
-        # Method 1: half-split similarity
+        # Find if the response starts repeating from the middle
+        # If first 50 chars appear again after position len/4, it's a repeat
         half = len(text) // 2
+        marker = text[:50]
+        second_start = text.find(marker, half - 50)
+        if second_start > 0 and second_start < half + 50:
+            return text[:second_start].strip()
+
+        # Fallback: half-split similarity
         first = text[:half].strip()
         second = text[half:].strip()
         if first and second:
             common = sum(1 for a, b in zip(first, second) if a == b)
-            if common / max(len(first), len(second)) > 0.45:
+            if common / max(len(first), len(second)) > 0.35:
                 return first
-
-        # Method 2: deduplicate repeated paragraphs
-        paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
-        seen = set()
-        unique = []
-        for p in paragraphs:
-            key = p[:80]
-            if key not in seen:
-                seen.add(key)
-                unique.append(p)
-        if len(unique) < len(paragraphs):
-            return "\n\n".join(unique)
 
         return text
 
