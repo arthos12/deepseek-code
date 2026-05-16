@@ -156,6 +156,7 @@ def cmd_chat(args, config: dict):
     if not prompt:
         lang = _show_startup(agent.model, display)
         task_map = _TASK_MAP_ZH if lang == "zh" else _TASK_MAP_EN
+        session_map = {}
         while True:
             try:
                 user_input = input("> ").strip()
