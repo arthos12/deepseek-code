@@ -74,14 +74,14 @@ def load_config(config_dir: str = ".") -> dict:
         except (json.JSONDecodeError, OSError):
             pass
 
-    config["sessions_dir"] = str(Path(config_dir) / config["sessions_dir"])
-    config["skills_dir"] = str(Path(config_dir) / config["skills_dir"])
+    install_dir = str(Path(__file__).resolve().parent.parent)
+    config["skills_dir"] = str(Path(install_dir) / config["skills_dir"])
 
-    # Project dir: env var > config > deepseek-code install dir
+    # Project dir: env var > config > cwd (per-project, not install dir)
     if not config.get("project_dir"):
-        config["project_dir"] = os.environ.get(
-            "DEEPSEEK_PROJECT_DIR",
-            str(Path(__file__).resolve().parent.parent)  # deepseek-code package root
-        )
+        config["project_dir"] = os.environ.get("DEEPSEEK_PROJECT_DIR", os.getcwd())
+
+    # Sessions per project directory
+    config["sessions_dir"] = str(Path(config["project_dir"]) / config["sessions_dir"])
 
     return config
