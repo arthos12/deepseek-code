@@ -14,6 +14,7 @@ deepseek chat
 
 - [memory/coding.md](memory/coding.md) — Coding conventions
 - [memory/git_conventions.md](memory/git_conventions.md) — Git conventions
+- [memory/comparison.md](memory/comparison.md) — vs Claude Code / Codex gap analysis
 
 ## Architecture
 
