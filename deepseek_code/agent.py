@@ -147,16 +147,31 @@ class Agent:
         return "Max turns reached."
 
     def _dedup_response(self, text: str) -> str:
-        """Detect and remove self-repetition (DeepSeek sometimes repeats entire response)."""
-        if len(text) < 400:
+        """Remove self-repetition in model output."""
+        if len(text) < 300:
             return text
+
+        # Method 1: half-split similarity
         half = len(text) // 2
         first = text[:half].strip()
         second = text[half:].strip()
         if first and second:
             common = sum(1 for a, b in zip(first, second) if a == b)
-            if common / max(len(first), len(second)) > 0.5:
+            if common / max(len(first), len(second)) > 0.45:
                 return first
+
+        # Method 2: deduplicate repeated paragraphs
+        paragraphs = [p.strip() for p in text.split("\n\n") if p.strip()]
+        seen = set()
+        unique = []
+        for p in paragraphs:
+            key = p[:80]
+            if key not in seen:
+                seen.add(key)
+                unique.append(p)
+        if len(unique) < len(paragraphs):
+            return "\n\n".join(unique)
+
         return text
 
     def _auto_save_memory(self, user_input: str, assistant_response: str) -> None:

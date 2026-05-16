@@ -17,14 +17,15 @@
       "Read",
       "Glob",
       "Grep",
-      "TodoWrite"
-    ],
-    "ask": [
+      "TodoWrite",
       "Write",
       "Edit",
-      "Shell",
       "WebFetch",
-      "WebSearch"
+      "WebSearch",
+      "Agent"
+    ],
+    "ask": [
+      "Shell"
     ],
     "deny": [
       "Read(*.pem)",
