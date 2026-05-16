@@ -1,29 +1,26 @@
 ---
 name: git_conventions
-description: Git 提交与分支规范
+description: Git 规范与工作流
 type: reference
 ---
 
-## 提交信息
+## 仓库
+
+https://github.com/arthos12/deepseek-code
+
+## 提交流程
+
+- 修改代码后，手动 `git add` + `git commit` + `git push`
+- 不自动提交，需用户确认
+- Co-Authored-By: Claude Code <noreply@anthropic.com>
+
+## 提交格式
 
 ```
 <type>: <简短描述>
 
-<详细说明（可选）>
+- 改动点 1
+- 改动点 2
 ```
 
-类型：`feat` / `fix` / `refactor` / `docs` / `test` / `chore`
-
-## 规则
-
-- 不 amend 已推送的提交
-- 不 force push 到 main/master
-- 不跳过 hooks（`--no-verify`）
-- 提交前验证改动（跑测试、检查 diff）
-- 新功能配测试
-
-## 常用操作
-
-- 查看改动：`git diff` / `git status`
-- 暂存特定文件：`git add <file>`，不用 `git add .`
-- 不提交 secrets、`.env`、`node_modules`、`__pycache__`
+类型: `feat` `fix` `refactor` `docs` `test` `chore`
