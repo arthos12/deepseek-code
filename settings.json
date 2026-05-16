@@ -1,0 +1,40 @@
+{
+  "model": "deepseek-chat",
+  "reasoning_model": "deepseek-reasoner",
+  "temperature": 0.0,
+  "analysis_temperature": 0.3,
+  "max_tokens": 4096,
+  "reasoning_max_tokens": 8192,
+  "timeout": 60,
+  "reasoning_timeout": 120,
+  "max_turns": 50,
+  "compact_trigger_tokens": 800000,
+  "sessions_dir": "./sessions",
+  "skills_dir": "./skills",
+  "default_shell": "powershell",
+  "permissions": {
+    "allow": [
+      "Read",
+      "Glob",
+      "Grep",
+      "TodoWrite"
+    ],
+    "ask": [
+      "Write",
+      "Edit",
+      "Shell",
+      "WebFetch",
+      "WebSearch"
+    ],
+    "deny": [
+      "Read(*.pem)",
+      "Read(*.key)",
+      "Write(*.env*)",
+      "Read(*wallet*)",
+      "Read(*secret*)",
+      "Read(*credential*)",
+      "Shell(rm -rf /*)",
+      "Shell(del /f C:*)"
+    ]
+  }
+}
