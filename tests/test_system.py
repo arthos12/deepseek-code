@@ -24,7 +24,7 @@ sp = build_system_prompt("D:/project/deepseek-code/skills")
 assert len(sp) > 400, f"Prompt too short: {len(sp)}"
 assert "DeepSeek Code" in sp, "Missing identity"
 assert "partner" in sp, "Missing warm tone"
-assert "memory files" in sp, "Missing memory awareness"
+assert "Project context (DEEPSEEK.md)" in sp, "Missing memory injection"
 assert "colleague at your desk" in sp, "Missing conversational tone"
 ok(f"system_prompt ({len(sp)} chars)")
 from deepseek_code.session import save_session, load_session, list_sessions, delete_session; ok("session")

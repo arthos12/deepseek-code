@@ -10,55 +10,53 @@ def build_system_prompt(skills_dir: str = "./skills", project_dir: str = ".") ->
     skill_descriptions = _load_skill_descriptions(skills_dir)
     python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
     default_shell = "PowerShell" if platform.system() == "Windows" else "Bash"
-    memory_info = _load_memory_index(project_dir)
-    project_info = _load_project_identity(project_dir)
+    memory_content = _load_memory_content(project_dir)
 
-    return f"""You are DeepSeek Code, a warm and reliable coding partner.{project_info}
+    return f"""You are DeepSeek Code, a warm and reliable coding partner.
 
-You're working on {platform.system()} with {default_shell} and Python {python_version}. Your project is at {os.getcwd()}. You have {memory_info} and can read, write, edit, search, run commands, and browse the web. Sessions can be resumed with `deepseek resume <id>`. Available skills: {skill_descriptions if skill_descriptions else "none"}.
+{memory_content}
+
+Working environment: {platform.system()} with {default_shell}, Python {python_version}. Project: {os.getcwd()}. Skills: {skill_descriptions if skill_descriptions else "none"}.
 
 Match the user's language — if they write in Chinese, reply in Chinese. If English, reply in English.
 
-When starting any multi-step task, use TodoWrite immediately to plan and track your progress. Update it as you go — mark steps complete, add new ones. This is how you remember what you're doing across a long session. Before answering "where were we" or "what did we just do", check your TodoWrite list first.
+When starting any multi-step task, use TodoWrite immediately to plan and track your progress. Update it as you go. Before answering "where were we", check your TodoWrite list first.
 
-Talk like a colleague at your desk, not a manual. For example:
-
-  User: "where is the config file"
-  Good: "settings.json, right here in the project root."
-  Bad: "## Config File Location\n\nThe configuration file is located at `settings.json` in the project root directory. It contains..."
-
-If the user asks a short question, a short answer is great. If you're unsure about something, just say so and check. When writing code, be thorough and precise. After making changes, verify they actually work. Don't touch files outside the project directory without asking, and never access sensitive files like .env or private keys.
-
-Your memory belongs to this project only — don't read memory files from other directories.
+Talk like a colleague at your desk, not a manual. If the user asks a short question, a short answer is great. When writing code, be thorough and precise. After changes, verify they work. Don't access files outside the project without asking, and never touch sensitive files like .env or private keys.
 """
     return prompt
 
 
-def _load_memory_index(project_dir: str) -> str:
+def _load_memory_content(project_dir: str) -> str:
+    """Load actual memory file contents into system prompt — like CLAUDE.md injection."""
+    memory_dir = Path(project_dir) / "memory"
     deepseek_md = Path(project_dir) / "DEEPSEEK.md"
-    if not deepseek_md.exists():
-        return "No DEEPSEEK.md loaded."
-    try:
-        count = 0
-        with open(deepseek_md, encoding="utf-8") as f:
-            for line in f:
-                if line.strip().startswith("- [memory/"):
-                    count += 1
-        return f"{count} memory files loaded ({project_dir}/DEEPSEEK.md)"
-    except Exception:
-        return "DEEPSEEK.md unreadable."
+    parts = []
 
-
-def _load_project_identity(project_dir: str) -> str:
-    dp = Path(project_dir) / "DEEPSEEK.md"
-    if dp.exists():
+    # Load DEEPSEEK.md
+    if deepseek_md.exists():
         try:
-            with open(dp, encoding="utf-8") as f:
-                first = f.readline().strip().lstrip("#").strip()
-            return f" Project: {first}."
+            content = deepseek_md.read_text(encoding="utf-8").strip()
+            parts.append(f"## Project context (DEEPSEEK.md)\n{content}")
         except Exception:
-            return ""
-    return ""
+            pass
+
+    # Load all memory/*.md files
+    if memory_dir.is_dir():
+        for md in sorted(memory_dir.glob("*.md")):
+            if md.name == "MEMORY.md":
+                continue
+            try:
+                content = md.read_text(encoding="utf-8").strip()
+                if len(content) > 800:
+                    content = content[:800] + "\n...(truncated)"
+                parts.append(f"## Memory: {md.stem}\n{content}")
+            except Exception:
+                pass
+
+    if parts:
+        return "\n\n".join(parts)
+    return "No memory files loaded."
 
 
 def _load_skill_descriptions(skills_dir: str) -> str:
