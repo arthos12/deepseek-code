@@ -170,7 +170,7 @@ body { font-family:var(--vscode-font-family); font-size:var(--vscode-font-size);
 #input:focus { outline:1px solid var(--vscode-focusBorder); }
 #send { background:var(--vscode-button-background); color:var(--vscode-button-foreground); border:none; padding:8px 16px; cursor:pointer; font-size:inherit; }
 #send:hover { background:var(--vscode-button-hoverBackground); }
-#key-area { display:none; padding:8px; margin-bottom:8px; border:1px solid var(--vscode-input-border); }
+#key-area { display:block; padding:8px; margin-bottom:8px; border:1px solid var(--vscode-input-border); }
 #key-area input { flex:1; background:var(--vscode-input-background); color:var(--vscode-input-foreground); border:1px solid var(--vscode-input-border); padding:4px 8px; font-family:inherit; }
 #key-area button { background:var(--vscode-button-background); color:var(--vscode-button-foreground); border:none; padding:4px 12px; cursor:pointer; }
 .thinking { color:var(--vscode-descriptionForeground); font-style:italic; }
