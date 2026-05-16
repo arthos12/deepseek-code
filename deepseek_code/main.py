@@ -155,20 +155,6 @@ def cmd_chat(args, config: dict):
     prompt = args.prompt
     if not prompt:
         lang = _show_startup(agent.model, display)
-
-        # Show recent sessions for quick resume
-        sessions = list_sessions(config["sessions_dir"])
-        session_map = {}
-        if sessions:
-            display.blank()
-            display.text("  Recent sessions:")
-            for i, s in enumerate(sessions[:5], 1):
-                title = s.get('title', '')[:50] or s['id'][:8]
-                display.text(f"    [{i}] {title}")
-                display.text(f"         {s['model']}  {s['updated'][:16]}  {s['message_count']} msgs")
-                session_map[str(i)] = s['id']
-            display.text(f"  Enter a number to resume, or just type your task.")
-
         task_map = _TASK_MAP_ZH if lang == "zh" else _TASK_MAP_EN
         while True:
             try:
@@ -178,6 +164,11 @@ def cmd_chat(args, config: dict):
                 break
             if user_input == "/exit":
                 break
+            if user_input == "/new":
+                resume_msgs = None
+                agent = Agent(config, registry)
+                display.info("Fresh session started.")
+                continue
             if not user_input:
                 continue
             # Session picker

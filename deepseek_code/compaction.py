@@ -15,38 +15,42 @@ class Compactor:
         return total_chars > self.trigger_chars
 
     def compact(self, messages: list[dict]) -> list[dict]:
-        """Keep system prompt + last 6 messages intact, summarize the middle."""
-        if len(messages) <= 8:
+        """Preserve system prompt + last 12 messages. Summarize middle with task awareness."""
+        if len(messages) <= 12:
             return messages
 
         system_msgs = [m for m in messages if m.get("role") == "system"]
         non_system = [m for m in messages if m.get("role") != "system"]
 
-        keep_recent = 8
+        keep_recent = 12  # was 8 — keep more context
         to_compact = non_system[:-keep_recent]
         recent = non_system[-keep_recent:]
 
-        # Build compacted summary
-        summary_parts = []
+        # Extract user tasks and key decisions
+        tasks = []
+        decisions = []
         for m in to_compact:
             role = m.get("role", "?")
             content = m.get("content", "")
-            if content and len(content) > 500:
-                content = content[:500] + "..."
-            if role == "user":
-                summary_parts.append(f"User: {content}")
-            elif role == "assistant" and m.get("tool_calls"):
-                names = [tc.get("function", {}).get("name", "?") for tc in m.get("tool_calls", [])]
-                summary_parts.append(f"Assistant called tools: {', '.join(names)}")
-            elif role == "tool":
-                tc_id = m.get("tool_call_id", "")[:8]
-                summary = content[:200] if content else ""
-                summary_parts.append(f"Tool result [{tc_id}]: {summary}")
+            if role == "user" and content:
+                tasks.append(content[:200])
+            elif role == "assistant" and not m.get("tool_calls"):
+                # Capture non-tool responses as potential decisions
+                if len(content) > 50:
+                    decisions.append(content[:300])
+
+        summary_parts = [f"Tasks worked on ({len(tasks)}):"]
+        for t in tasks[-5:]:  # last 5 tasks
+            summary_parts.append(f"  - {t}")
+        if decisions:
+            summary_parts.append(f"\nKey outcomes:")
+            for d in decisions[-3:]:  # last 3 decisions
+                summary_parts.append(f"  - {d[:150]}")
 
         compacted_msg = {
             "role": "system",
             "content": (
-                "[Context compacted — earlier messages summarized]\n\n"
+                "[Earlier context summarized]\n\n"
                 + "\n".join(summary_parts)
             ),
         }

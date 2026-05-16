@@ -2,6 +2,8 @@
 
 CLI coding agent for DeepSeek models. Agentic loop, 10 tools, streaming, session persistence.
 
+GitHub: https://github.com/arthos12/deepseek-code
+
 ## Install
 
 ```bash
