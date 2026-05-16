@@ -16,13 +16,13 @@ class Compactor:
 
     def compact(self, messages: list[dict]) -> list[dict]:
         """Preserve system prompt + last 12 messages. Summarize middle with task awareness."""
-        if len(messages) <= 12:
+        if len(messages) <= 20:
             return messages
 
         system_msgs = [m for m in messages if m.get("role") == "system"]
         non_system = [m for m in messages if m.get("role") != "system"]
 
-        keep_recent = 12  # was 8 — keep more context
+        keep_recent = 20  # keep more context before compacting
         to_compact = non_system[:-keep_recent]
         recent = non_system[-keep_recent:]
 

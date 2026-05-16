@@ -15,7 +15,7 @@ DEFAULT_CONFIG: dict[str, Any] = {
     "timeout": 60,
     "reasoning_timeout": 120,
     "max_turns": 50,
-    "compact_trigger_tokens": 800000,
+    "compact_trigger_tokens": 2000000,
     "sessions_dir": "./sessions",
     "skills_dir": "./skills",
     "default_shell": "powershell",
