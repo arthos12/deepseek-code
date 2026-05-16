@@ -21,10 +21,9 @@ _CONSECUTIVE_FAILURE_LIMIT = 3
 
 # Keywords for model auto-routing
 _REASONER_KEYWORDS = [
-    "error", "bug", "crash", "traceback", "exception", "fail",
-    "analyze", "explain", "why", "diagnose", "root cause",
-    "报错", "异常", "崩溃", "失败", "调试", "分析", "解释", "为什么", "原因",
-    "漏洞", "安全", "审查", "review", "vulnerability", "security",
+    "error", "bug", "crash", "traceback", "exception",
+    "报错", "异常", "崩溃", "调试",
+    "漏洞", "vulnerability", "security",
 ]
 
 
@@ -122,7 +121,8 @@ class Agent:
                         self.token_usage["prompt_tokens"],
                         self.token_usage["completion_tokens"],
                     )
-                cleaned = self.display.content(text_content or "")
+                cleaned = self._dedup_response(text_content or "")
+                cleaned = self.display.content(cleaned)
                 self.messages.append({"role": "assistant", "content": cleaned})
                 return cleaned
 
@@ -145,6 +145,19 @@ class Agent:
                 self._consecutive_failures = 0
 
         return "Max turns reached."
+
+    def _dedup_response(self, text: str) -> str:
+        """Detect and remove self-repetition (DeepSeek sometimes repeats entire response)."""
+        if len(text) < 400:
+            return text
+        half = len(text) // 2
+        first = text[:half].strip()
+        second = text[half:].strip()
+        if first and second:
+            common = sum(1 for a, b in zip(first, second) if a == b)
+            if common / max(len(first), len(second)) > 0.5:
+                return first
+        return text
 
     def _auto_save_memory(self, user_input: str, assistant_response: str) -> None:
         try:
