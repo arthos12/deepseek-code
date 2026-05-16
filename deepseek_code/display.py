@@ -145,6 +145,30 @@ class Display:
         else:
             print(f"ERROR: {text}", file=sys.stderr)
 
+    def diff(self, text: str) -> None:
+        """Show git diff with color."""
+        lines = text.split("\n")[:30]
+        for line in lines:
+            if line.startswith("+") and not line.startswith("+++"):
+                if self._console:
+                    self._console.print(f"  {line}", style="green")
+                else:
+                    print(f"  {line}")
+            elif line.startswith("-") and not line.startswith("---"):
+                if self._console:
+                    self._console.print(f"  {line}", style="red")
+                else:
+                    print(f"  {line}")
+            elif line.startswith("@@"):
+                if self._console:
+                    self._console.print(f"  {line}", style="dim cyan")
+                else:
+                    print(f"  {line}")
+            else:
+                pass  # skip context lines, only show changes
+        if len(lines) > 30:
+            print(f"  ... ({len(lines) - 30} more lines)")
+
     def separator(self) -> None:
         """Visual break between turns."""
         if self._console:

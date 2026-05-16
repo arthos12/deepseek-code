@@ -28,6 +28,8 @@ from deepseek_code.tools.todo_write import TodoWriteTool
 from deepseek_code.tools.agent_tool import AgentTool
 from deepseek_code.tools.memory_save import MemorySaveTool
 from deepseek_code.display import Display
+from deepseek_code.checkpoint import Checkpoint
+from deepseek_code import git_utils
 
 
 def _ensure_api_key(config: dict, config_dir: str) -> None:
@@ -122,7 +124,12 @@ def _show_startup(model: str, display) -> str:
             o |
              o|""")
     display.text(f"  {display_name} · {context_size} context · v0.1.0")
-    display.text(f"  Welcome — your coding partner is ready.")
+
+    # Git status at startup
+    if git_utils.is_git_repo("."):
+        branch = git_utils.get_branch(".")
+        status = git_utils.get_status(".")
+        display.text(f"  git: {branch}  {status[:60]}")
     display.blank()
     return _detect_lang()
 
@@ -257,6 +264,31 @@ def cmd_list(args, config: dict):
         display.text(f"  {s['model']}  {s['updated'][:19]}  {s['message_count']} msgs")
 
 
+def cmd_undo(args, config: dict):
+    display = Display()
+    cp = Checkpoint(config.get("sessions_dir", "./sessions"))
+
+    if args.checkpoint_id:
+        record = cp.undo(args.checkpoint_id)
+        if record:
+            display.info(f"Undone: {record['file']} ({record['id']})")
+        else:
+            display.error(f"Checkpoint not found: {args.checkpoint_id}")
+        return
+
+    checkpoints = cp.list_checkpoints()
+    if not checkpoints:
+        display.info("Nothing to undo.")
+        return
+
+    # Undo latest
+    record = cp.undo()
+    if record:
+        display.info(f"Undone: {record['file']} ({record['id']})")
+    else:
+        display.info("Nothing to undo.")
+
+
 def cmd_delete(args, config: dict):
     display = Display()
     if delete_session(args.session_id, config["sessions_dir"]):
@@ -284,6 +316,9 @@ def main():
     p_del = sub.add_parser("delete", help="Delete a session")
     p_del.add_argument("session_id", type=str)
 
+    p_undo = sub.add_parser("undo", help="Undo last file change")
+    p_undo.add_argument("checkpoint_id", type=str, nargs="?", default=None)
+
     try:
         args = parser.parse_args()
     except SystemExit:
@@ -310,6 +345,8 @@ def main():
         cmd_list(args, config)
     elif args.command == "delete":
         cmd_delete(args, config)
+    elif args.command == "undo":
+        cmd_undo(args, config)
     else:
         parser.print_help()
 

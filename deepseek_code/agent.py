@@ -16,6 +16,8 @@ from deepseek_code.memory_hook import (
     append_to_memory,
     update_memory_index,
 )
+from deepseek_code.checkpoint import Checkpoint
+from deepseek_code import git_utils
 
 _CONSECUTIVE_FAILURE_LIMIT = 3
 
@@ -42,6 +44,9 @@ class Agent:
         self._system_prompt = None
         self._step = 0
         self._consecutive_failures = 0
+        self.checkpoint = Checkpoint(config.get("sessions_dir", "./sessions"))
+        self._in_git = git_utils.is_git_repo(config.get("project_dir", "."))
+        self._project_dir = config.get("project_dir", ".")
 
     @property
     def system_prompt(self) -> str:
@@ -275,12 +280,26 @@ class Agent:
             if pre_result is not None:
                 results_by_id[tc["id"]] = pre_result
                 continue
+            # P0: checkpoint before Write/Edit
+            if tc["name"] in ("Write", "Edit"):
+                filepath = tc["arguments"].get("file_path", "")
+                if filepath:
+                    self.checkpoint.save(filepath)
+
             self.display.tool_call(step, tc["name"], tc["arguments"])
             result = self.registry.execute(tc["name"], tc["arguments"])
             if result.is_error:
                 failed += 1
             results_by_id[tc["id"]] = result
             self.display.tool_result(step, tc["name"], result.content, result.is_error)
+
+            # P0: show diff after Write/Edit
+            if tc["name"] in ("Write", "Edit") and not result.is_error:
+                filepath = tc["arguments"].get("file_path", "")
+                if filepath and self._in_git:
+                    diff = git_utils.diff_file(filepath, path=self._project_dir)
+                    if diff:
+                        self.display.diff(diff)
 
         for tc in tool_calls:
             result = results_by_id.get(tc["id"], ToolResult(content="?", is_error=True))
